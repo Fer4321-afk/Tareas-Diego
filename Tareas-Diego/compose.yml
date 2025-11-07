@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: ./apache
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    configs:
+      - source: apache_conf
+        target: /usr/local/apache2/conf/httpd.conf
+    volumes:
+      - ./www:/usr/local/apache2/htdocs:ro
+      - ./cgi-bin:/usr/local/apache2/cgi-bin:ro
+    secrets:
+      - api_key
+      - pg_pass
+    networks:
+      - webnet # ✅ debe ser una lista con un guion y el nombre (sin llaves ni objetos)
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: fiestadb
+      POSTGRES_USER: fiestadmin
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_pass
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - pg_pass
+    networks:
+      - webnet # ✅ igual aquí, simple texto
+
+configs:
+  apache_conf:
+    file: ./apache/httpd.conf
+
+secrets:
+  api_key:
+    file: ./secrets/API_KEY.txt
+  pg_pass:
+    file: ./secrets/POSTGRES_PASSWORD.txt
+
+networks:
+  webnet: # ✅ definida correctamente al final
+    driver: bridge
