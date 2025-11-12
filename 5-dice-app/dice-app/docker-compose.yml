@@ -1,0 +1,9 @@
+services:
+  dice-app:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - sides.env
+    environment:
+      - DICE_SIDES=${DICE_SIDES:-6}
