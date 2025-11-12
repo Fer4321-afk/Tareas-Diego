@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  fiesta_app:
+    build: ./app
+    container_name: fiesta_app
+    expose:
+      - "8000"  # Solo expuesto dentro de la red de Docker
+    restart: unless-stopped
+
+  fiesta_nginx:
+    image: nginx:1.27-alpine
+    container_name: fiesta_nginx
+    depends_on:
+      - fiesta_app
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"  # Exponemos el puerto para el host
+    restart: unless-stopped
